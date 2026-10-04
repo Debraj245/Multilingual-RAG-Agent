@@ -51,32 +51,32 @@ Answer + Sources app/rag_pipeline.py
 
 multilingual-rag/
 ├── data/
-│ ├── documents/
-│ │ ├── pdf/
-│ │ ├── docx/
-│ │ └── txt/
-│ └── processed/
-│ └── chunks/
-├── chroma_db/ # ChromaDB persistent storage (auto-created)
+│   ├── documents/
+│   │   ├── pdf/
+│   │   ├── docx/
+│   │   └── txt/
+│   └── processed/
+│       └── chunks/
+├── chroma_db/                     # ChromaDB persistent storage (auto-created)
 ├── app/
-│ ├── init.py
-│ ├── config.py # paths, model names, chunk size, API keys
-│ ├── document_loader.py # finds/saves files across pdf/docx/txt
-│ ├── text_extractor.py # extracts text per format
-│ ├── text_cleaner.py # removes noise, extra whitespace
-│ ├── chunker.py # splits into overlapping chunks
-│ ├── metadata.py # source/language tagging
-│ ├── embeddings.py # multilingual sentence-transformers embeddings
-│ ├── vector_store.py # ChromaDB add/search
-│ ├── retriever.py # query -> embed -> search
-│ ├── llm.py # Groq LLM calls
-│ ├── rag_pipeline.py # retrieval + LLM answer generation
-│ └── utils.py # shared helpers
+│   ├── __init__.py
+│   ├── config.py                  # paths, model names, chunk size, API keys
+│   ├── document_loader.py         # finds/saves files across pdf/docx/txt
+│   ├── text_extractor.py          # extracts text per format
+│   ├── text_cleaner.py            # removes noise, extra whitespace
+│   ├── chunker.py                 # splits into overlapping chunks
+│   ├── metadata.py                # source/language tagging
+│   ├── embeddings.py              # multilingual sentence-transformers embeddings
+│   ├── vector_store.py            # ChromaDB add/search
+│   ├── retriever.py               # query -> embed -> search
+│   ├── llm.py                     # Groq LLM calls
+│   ├── rag_pipeline.py            # retrieval + LLM answer generation
+│   └── utils.py                   # shared helpers
 ├── scripts/
-│ ├── ingest.py # CLI: process all documents into the KB
-│ └── query.py # CLI: ask a question from the terminal
+│   ├── ingest.py                  # CLI: process all documents into the KB
+│   └── query.py                   # CLI: ask a question from the terminal
 ├── tests/
-├── app.py # Streamlit chat UI (main entry point)
+├── app.py                         # Streamlit chat UI (main entry point)
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
