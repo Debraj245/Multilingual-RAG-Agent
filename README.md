@@ -1,96 +1,529 @@
-# Multilingual RAG Knowledge Agent
+# 🌍 Multilingual RAG Knowledge Agent
 
-**Project:** Design of a Multilingual Intelligent AI Agent using LLM and
-Retrieval-Augmented Generation for Accurate Information Retrieval
+> **A multilingual AI knowledge agent that uses Retrieval-Augmented Generation (RAG) to retrieve relevant information from documents and generate grounded, source-aware answers.**
 
-## What this does
-Upload documents (PDF, DOCX, TXT) in any language, and ask questions about
-them in any language — the system retrieves the most relevant content by
-*meaning* (not keyword matching) and generates a grounded answer, citing
-exactly which document it came from.
+**Project:** Design of a Multilingual Intelligent AI Agent using LLM and Retrieval-Augmented Generation for Accurate Information Retrieval.
 
-## Pipeline
+---
 
-Documents (PDF/DOCX/TXT)
-│
-▼
-Document Loader app/document_loader.py
-│
-▼
-Text Extraction app/text_extractor.py
-│
-▼
-Text Cleaning app/text_cleaner.py
-│
-▼
-Chunking app/chunker.py
-│
-▼
-Metadata app/metadata.py (source / language / timestamp)
-│
-▼
-Embeddings app/embeddings.py (multilingual sentence-transformers)
-│
-▼
-ChromaDB (Vector DB) app/vector_store.py
-│
-▼
-Retriever app/retriever.py
-│
-▼
+## 🚀 Overview
+
+The **Multilingual RAG Knowledge Agent** allows users to upload documents and ask questions about their content using natural language.
+
+The system supports **PDF, DOCX, and TXT** documents and is designed for multilingual and cross-lingual retrieval.
+
+Instead of relying only on keyword matching, the system converts document content and queries into semantic embeddings, retrieves relevant context from a vector database, and passes that context to an LLM to generate a grounded response.
+
+### ✨ What makes it different?
+
+- 🌐 Multilingual semantic retrieval
+- 🔎 Meaning-based document search
+- 📚 PDF, DOCX, and TXT support
+- 🧠 Retrieval-Augmented Generation
+- 🗃️ Persistent local vector database
+- 🤖 Groq-powered LLM generation
+- 📌 Source-aware answers
+- 💻 CLI and Streamlit interfaces
+
+---
+
+## 🏗️ Architecture
+
+```text
+                    ┌─────────────────────┐
+                    │   PDF / DOCX / TXT  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Document Loader   │
+                    │ app/document_loader  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Text Extraction   │
+                    │ app/text_extractor  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Text Cleaning    │
+                    │  app/text_cleaner   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      Chunking       │
+                    │    app/chunker      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      Metadata       │
+                    │    app/metadata     │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     Embeddings      │
+                    │    app/embeddings   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      ChromaDB       │
+                    │    Vector Store     │
+                    └──────────┬──────────┘
+                               │
+                         Semantic Search
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │      Retriever      │
+                    │    app/retriever    │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │  Relevant Context   │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │     Groq LLM        │
+                    │      app/llm        │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ Answer + Sources    │
+                    │ app/rag_pipeline    │
+                    └─────────────────────┘
+```
+
+---
+
+## 🔄 RAG Pipeline
+
+The application follows a standard Retrieval-Augmented Generation workflow:
+
+### 1. Document ingestion
+
+Users provide documents in:
+
+- PDF
+- DOCX
+- TXT
+
+### 2. Text extraction
+
+Text is extracted from the uploaded documents and normalized for processing.
+
+### 3. Text cleaning
+
+Unnecessary formatting and noisy content are removed before chunking.
+
+### 4. Chunking
+
+Large documents are divided into smaller overlapping chunks so that relevant sections can be retrieved efficiently.
+
+### 5. Metadata generation
+
+Each chunk contains metadata such as:
+
+```text
+source
+language
+timestamp
+```
+
+This allows retrieved information to be associated with its original document.
+
+### 6. Embedding generation
+
+The chunks are converted into semantic vectors using:
+
+```text
+sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+```
+
+This allows the system to perform semantic retrieval across supported languages without requiring a translation step.
+
+### 7. Vector storage
+
+Embeddings and metadata are stored in **ChromaDB**.
+
+### 8. Retrieval
+
+When a user asks a question, the query is embedded and the most semantically relevant document chunks are retrieved.
+
+### 9. Generation
+
+The retrieved context is passed to the **Groq LLM**, which generates an answer based on the available context.
+
+### 10. Source attribution
+
+The final response includes the source information associated with the retrieved context.
+
+---
+
+## 🧠 Key Design Decisions
+
+### Multilingual Embeddings
+
+The project uses:
+
+```text
+sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+```
+
+This provides multilingual semantic embeddings and enables cross-lingual retrieval without translating every document before indexing.
+
+For example:
+
+```text
+Document: "Machine learning is a subset of artificial intelligence."
+
+Query: "What is machine learning?"
+```
+
+The system can retrieve the relevant content based on semantic similarity rather than exact keyword matching.
+
+---
+
+### 🗃️ ChromaDB
+
+ChromaDB is used as the local vector database.
+
+**Why ChromaDB?**
+
+- Easy local setup
+- Persistent storage
+- Python-friendly
+- Suitable for academic and prototype applications
+- No separate database server required
+
+---
+
+### ⚡ Groq LLM
+
+Groq is used for final response generation.
+
+The LLM is intentionally used **after retrieval** rather than as the document search mechanism.
+
+```text
+User Query
+    ↓
+Embedding
+    ↓
+Semantic Retrieval
+    ↓
 Relevant Context
-│
-▼
-LLM (Groq) app/llm.py
-│
-▼
-Answer + Sources app/rag_pipeline.py
+    ↓
+Groq LLM
+    ↓
+Grounded Answer
+```
 
-## Quick start
+This separation helps keep retrieval and generation as distinct components.
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|---|---|
+| Language | Python |
+| RAG | Custom RAG Pipeline |
+| Embeddings | Sentence Transformers |
+| Embedding Model | `paraphrase-multilingual-mpnet-base-v2` |
+| Vector Database | ChromaDB |
+| LLM | Groq |
+| UI | Streamlit |
+| Document Formats | PDF, DOCX, TXT |
+| Environment | Python Virtual Environment |
+
+---
+
+## 📁 Project Structure
+
+```text
+multilingual-rag/
+│
+├── app/
+│   ├── document_loader.py
+│   ├── text_extractor.py
+│   ├── text_cleaner.py
+│   ├── chunker.py
+│   ├── metadata.py
+│   ├── embeddings.py
+│   ├── vector_store.py
+│   ├── retriever.py
+│   ├── llm.py
+│   └── rag_pipeline.py
+│
+├── data/
+│   └── documents/
+│       ├── pdf/
+│       ├── docx/
+│       └── txt/
+│
+├── scripts/
+│   ├── ingest.py
+│   └── query.py
+│
+├── app.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
+
 ```bash
-# 1. Create environment
+git clone <YOUR_REPOSITORY_URL>
+cd multilingual-rag
+```
+
+### 2. Create a virtual environment
+
+#### macOS / Linux
+
+```bash
 python -m venv .venv
-source .venv/bin/activate        # Mac/Linux
-.venv\Scripts\activate           # Windows
+source .venv/bin/activate
+```
 
-# 2. Install dependencies
+#### Windows
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
+```
 
-# 3. Add your Groq API key
+### 4. Configure environment variables
+
+Create your `.env` file:
+
+```bash
 cp .env.example .env
-# then edit .env and add: GROQ_API_KEY=your_key_here
+```
 
-# 4. Add documents
-# Drop PDF/DOCX/TXT files into data/documents/pdf/, /docx/, or /txt/
+Then add your API key:
 
-# 5a. Ingest via CLI
+```env
+GROQ_API_KEY=your_key_here
+```
+
+> ⚠️ Never commit your `.env` file or API keys to GitHub.
+
+---
+
+## 📚 Add Documents
+
+Place your documents inside:
+
+```text
+data/documents/
+├── pdf/
+├── docx/
+└── txt/
+```
+
+Example:
+
+```text
+data/documents/pdf/
+├── artificial_intelligence.pdf
+└── machine_learning.pdf
+```
+
+---
+
+## ▶️ Running the Project
+
+### Ingest documents
+
+```bash
 python scripts/ingest.py
+```
 
-# 5b. Ask via CLI
-python scripts/query.py "your question here"
+### Query through CLI
 
-# 5c. Or run the full chat UI (handles upload + ingestion + asking)
+```bash
+python scripts/query.py "What is machine learning?"
+```
+
+### Run the Streamlit application
+
+```bash
 streamlit run app.py
 ```
 
-## Key design choices
-- **Embeddings**: `sentence-transformers/paraphrase-multilingual-mpnet-base-v2`
-  — supports 100+ languages natively, no translation step required. Same-meaning
-  sentences across different languages land close together in vector space,
-  enabling cross-lingual retrieval.
-- **Vector DB**: ChromaDB, running locally in persistent mode — no separate
-  server needed, good fit for a single-machine academic project.
-- **LLM**: Groq (fast inference), used only to generate the final answer from
-  retrieved context — never to search or rank documents.
-- **Chunking**: word-based with overlap, kept language-agnostic so it behaves
-  consistently across every script in the corpus.
+The Streamlit interface allows you to upload documents and interact with the knowledge agent.
 
-## Known limitations
-- No OCR — scanned/image-only PDFs yield no extractable text.
-- Language detection can be unreliable on very short documents.
-- Groq API calls require network access and count against your quota.
+---
 
-## Status
-- **Phase 2 (this phase)**: Document ingestion + multilingual knowledge base — complete.
-- **Next**: Improve retrieval (hybrid search, reranking), add evaluation metrics,
-  and expand query handling (rewriting, multi-hop questions).
+## 💬 Example
+
+### Query
+
+```text
+What is the main purpose of retrieval augmented generation?
+```
+
+### Pipeline
+
+```text
+Question
+   ↓
+Query Embedding
+   ↓
+Semantic Search
+   ↓
+Top Relevant Chunks
+   ↓
+Context Construction
+   ↓
+Groq LLM
+   ↓
+Grounded Answer
+   ↓
+Source Information
+```
+
+---
+
+## 🌐 Multilingual Retrieval
+
+The system is designed to support multilingual document collections.
+
+For example, a user can ask a question in one supported language while relevant information may exist in another language.
+
+```text
+User Query
+    │
+    ▼
+Multilingual Embedding
+    │
+    ▼
+ChromaDB Semantic Search
+    │
+    ▼
+Relevant Cross-Lingual Context
+    │
+    ▼
+LLM
+    │
+    ▼
+Answer
+```
+
+The effectiveness of cross-lingual retrieval depends on the embedding model and the language being used, so multilingual performance should be evaluated with representative test data.
+
+---
+
+## 🔐 Security
+
+API keys and secrets should be stored in environment variables.
+
+Make sure `.env` is included in `.gitignore`:
+
+```gitignore
+.env
+.venv/
+__pycache__/
+chroma/
+```
+
+Never upload API keys, tokens, or credentials to the repository.
+
+---
+
+## ⚠️ Current Limitations
+
+- Scanned/image-only PDFs are not currently supported because OCR is not implemented.
+- Very short documents may produce unreliable language detection.
+- Retrieval quality depends on document quality, chunking, and embedding performance.
+- Groq API usage requires network access and is subject to API limits.
+- The current retriever is primarily semantic/vector-based.
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Completed
+
+- [x] PDF/DOCX/TXT document ingestion
+- [x] Text extraction
+- [x] Text cleaning
+- [x] Document chunking
+- [x] Metadata handling
+- [x] Multilingual embeddings
+- [x] ChromaDB vector storage
+- [x] Semantic retrieval
+- [x] Groq LLM integration
+- [x] CLI querying
+- [x] Streamlit interface
+
+### 🚧 In Progress / Planned
+
+- [ ] Hybrid retrieval — BM25 + vector search
+- [ ] Reranking retrieved documents
+- [ ] Query rewriting
+- [ ] Multi-hop question answering
+- [ ] Retrieval evaluation
+- [ ] Answer quality evaluation
+- [ ] RAGAS-based evaluation
+- [ ] OCR for scanned documents
+- [ ] Improved source citation
+- [ ] Conversation memory
+
+---
+
+## 📊 Evaluation
+
+A future evaluation module will measure retrieval and generation quality using metrics such as:
+
+- **Context Precision**
+- **Context Recall**
+- **Faithfulness**
+- **Answer Relevance**
+- **Retrieval Recall@K**
+
+This will make it possible to compare different retrieval strategies and measure improvements objectively.
+
+---
+
+## 🎯 Project Goals
+
+The long-term goal is to build a reliable multilingual knowledge agent capable of:
+
+```text
+        Documents
+            ↓
+   Multilingual Retrieval
+            ↓
+      Relevant Context
+            ↓
+       LLM Reasoning
+            ↓
+   Grounded Response
+            ↓
+    Source Attribution
+```
+
+The project focuses on reducing unsupported LLM responses by grounding generation in retrieved document context.
+
