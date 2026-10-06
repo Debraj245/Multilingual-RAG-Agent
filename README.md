@@ -23,7 +23,6 @@ Instead of relying only on keyword matching, the system converts document conten
 - 🗃️ Persistent local vector database
 - 🤖 Groq-powered LLM generation
 - 📌 Source-aware answers
-- 💻 CLI and Streamlit interfaces
 
 ---
 
